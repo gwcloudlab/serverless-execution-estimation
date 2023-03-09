@@ -115,6 +115,13 @@ class Dataset:
                 uniqueValues[value] = len(uniqueValues)
         df[columnIndex] = df[columnIndex].map(lambda x: uniqueValues[x])
     
+
+    def split_data_functions_2(self, function_names, x_values, size):
+        self.functions = {}
+        for name in function_names:
+            self.functions[name[len('response_time_'):len(name)]] = ServerlessFunction(name, self.dataset)
+            self.functions[name[len('response_time_'):len(name)]].split_data(x_values, [name], size, 12)
+
     def split_into_functions(self, columnID, columnPivot, valuesPivot, non_numeric_condition):
         """_summary_
 
