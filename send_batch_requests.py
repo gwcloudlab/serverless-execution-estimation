@@ -27,7 +27,8 @@ if __name__=="__main__":
     requests_per_second = int(sys.argv[1])
     total_seconds = int(sys.argv[2])
     num_threads = int(sys.argv[3])
-    sledge_url = sys.argv[4]
+    deadline = float(sys.argv[4])
+    sledge_url = sys.argv[5]
     
 
     predictions_index = "estimated_time" + sledge_url.split("/")[-2][len("resize"):]
@@ -57,14 +58,16 @@ if __name__=="__main__":
     for t in threads:
         t.join()
 
-    all_data = pd.DataFrame(columns=("filename", "status_code"))
+    all_data = pd.DataFrame(columns=("filename", "status_code", "missed_deadline"))
 
     for i in range(0, num_threads):
         cur_csv = pd.read_csv("result{}.csv".format(i))
         for j in range(0, len(cur_csv)):
-            all_data.loc[len(all_data.index)] = [predictions['filename'][i], cur_csv['status-code'][j]]
+            missed_deadline = True if deadline - float(cur_csv['response-time'][i]) < 0 else False
+            print(missed_deadline)
+            all_data.loc[len(all_data.index)] = [predictions['filename'][i], cur_csv['status-code'][j], missed_deadline]
     
-    all_data.to_csv('results.csv')
+    all_data.to_csv('results.csv', index=False)
 
 
     for i in range(0, len(predictions)):
