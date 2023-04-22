@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 
 def worker(image_path, estimated_excution_time, sledge_url, rps, ts, i):
-    request = 'hey -disable-compression -disable-keepalive -disable-redirects -H "Expected_Cost: {}" -c 4 -o csv -t 0 -q {} -z {}s -m POST -D "{}" "{}" >> result{}.csv'.format(estimated_excution_time,rps,ts,image_path,sledge_url, i)
+    request = 'hey -disable-compression -disable-keepalive -disable-redirects -H "expected_cost: {}" -c 4 -o csv -t 0 -q {} -z {}s -m POST -D "{}" "{}" >> result{}.csv'.format(estimated_excution_time,rps,ts,image_path,sledge_url, i)
     os.system(request)
 
 # Credit: https://cmdlinetips.com/2022/07/randomly-sample-rows-from-a-big-csv-file/ 
@@ -64,7 +64,6 @@ if __name__=="__main__":
         cur_csv = pd.read_csv("result{}.csv".format(i))
         for j in range(0, len(cur_csv)):
             missed_deadline = True if deadline - float(cur_csv['response-time'][i]) < 0 else False
-            print(missed_deadline)
             all_data.loc[len(all_data.index)] = [predictions['filename'][i], cur_csv['status-code'][j], missed_deadline]
     
     all_data.to_csv('results.csv', index=False)
