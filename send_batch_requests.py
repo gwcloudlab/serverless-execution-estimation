@@ -26,12 +26,13 @@ if __name__=="__main__":
 
     requests_per_second = int(sys.argv[1])
     total_seconds = int(sys.argv[2])
-    sledge_url = sys.argv[3]
+    num_threads = int(sys.argv[3])
+    sledge_url = sys.argv[4]
     
 
     predictions_index = "estimated_time" + sledge_url.split("/")[-2][len("resize"):]
 
-    predictions = sample_n_from_csv(filename="predictions.csv", n=30)
+    predictions = sample_n_from_csv(filename="predictions.csv", n=num_threads)
     # url,filename,estimated_time_small,estimated_time_medium,estimated_time_large
     path =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'images')
     if not os.path.exists(path):
@@ -47,7 +48,7 @@ if __name__=="__main__":
 
     threads = []
 
-    for i in range(0, 30):
+    for i in range(0, num_threads):
         
         # image_path, estimated_excution_time, sledge_url, rps, i
         threads.append(Thread(target=worker, args=(os.path.join(path,predictions['filename'][i]), float(predictions[predictions_index][i]) * pow(10, 6), sledge_url, requests_per_second, total_seconds, i)))
@@ -58,7 +59,7 @@ if __name__=="__main__":
 
     all_data = pd.DataFrame(columns=("filename", "status_code"))
 
-    for i in range(0, 30):
+    for i in range(0, num_threads):
         cur_csv = pd.read_csv("result{}.csv".format(i))
         for j in range(0, len(cur_csv)):
             all_data.loc[len(all_data.index)] = [predictions['filename'][i], cur_csv['status-code'][j]]
